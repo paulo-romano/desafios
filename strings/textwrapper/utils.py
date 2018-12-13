@@ -2,7 +2,7 @@ import textwrap
 
 
 def _wrap_text(text, max_length):
-    """ Wrap given text, splinting it into line with limited length.
+    """Wrap given text, splinting it into line with limited length.
 
     :param text: Text to be wrapped
     :type text: str
@@ -12,3 +12,14 @@ def _wrap_text(text, max_length):
     :rtype: list
     """
     return textwrap.wrap(text, max_length)
+
+
+def _join_lines(lines):
+    """Join lines into a single string
+
+    :param lines: Lines to be joined
+    :type lines: list
+    :return: string
+    :rtype: str
+    """
+    return '\n'.join(lines)

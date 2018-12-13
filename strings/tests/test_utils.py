@@ -50,3 +50,21 @@ class TestWrapText:
         _wrap_text = self._get_wrap_text_function()
         lines = _wrap_text(text, max_length)
         assert lines == expected_lines
+
+
+class TestJoinLines:
+    @staticmethod
+    def _get_join_lines_function():
+        return getattr(utils, '_join_lines')
+
+    @pytest.mark.parametrize('lines, expected_text', (
+        (['super loo', 'boobaloo no'], 'super loo\nboobaloo no'),
+        (
+            ['God and Devil', 'False or Not', 'Who knows'],
+            'God and Devil\nFalse or Not\nWho knows'
+        ),
+    ))
+    def test_must_join_lines_with_new_line_char(
+            self, lines, expected_text):
+        _join_lines = self._get_join_lines_function()
+        assert _join_lines(lines) == expected_text

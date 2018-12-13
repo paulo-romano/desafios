@@ -27,9 +27,27 @@ Você deve seguir o exemplo de output [deste arquivo](https://github.com/idwall/
 ### Parte 2 (Intermediário) - limite 40 caracteres
 O exemplo de output está [neste arquivo](https://github.com/idwall/desafios/blob/master/strings/output-parte2.txt), onde além de o arquivo possuir, no máximo, 40 caracteres por linha, o texto deve estar **justificado**.
 
-### Dicas
-- Existe um template para projetos em Java ;)
+## Notas de desenvolvimento
+Na biblioteca padrão do python 3.4+, existe o modulo [textwrap](https://docs.python.org/3.4/library/textwrap.html) que será utilizado para quebrar as linhas do texto.
+Para facilitar a implementação de comandos administrativos será utilizado a biblioteca [click](https://click.palletsprojects.com/en/7.x/).
 
-### Extras
+## Como executar
+1. Crie um ambiente virtual.
+2. Ative o ambiente virtual.
+3. Instale as dependências.
+4. Execute o comando.
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python textwrapper <long_ugly_text>
+```
 
-- Parametrização da quantidade de caracteres por linha.
+## Como executar os testes
+1. Siga os passos 1 e 2 da sessão "Como executar" acima.
+2. Instale as dependências de desenvolvimento.
+3. Execute o tox.
+```bash
+pip install -r requirements-dev.txt
+tox
+```

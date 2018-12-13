@@ -26,4 +26,13 @@ def _join_lines(lines):
 
 
 def get_formatted_text(text, max_length):
+    """Return formatted text.
+
+    :param text: Text to be wrapped
+    :type text: str
+    :param max_length:
+    :type max_length: int
+    :return: Formatted text
+    :rtype: str
+    """
     return _join_lines(_wrap_text(text, max_length))

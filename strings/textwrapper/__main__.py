@@ -8,7 +8,10 @@ import utils
 @click.option('--max-length', default=40)
 def textwrapper(text, max_length):
     print('=' * max_length)
-    print(utils.get_formatted_text(text, max_length))
+    try:
+        print(utils.get_formatted_text(text, max_length))
+    except Exception as ex:
+        print(f'Error: {ex}')
     print('=' * max_length)
 
 

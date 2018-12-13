@@ -83,3 +83,10 @@ class TestGetFormattedText:
                         'from the darkness.'
 
         assert utils.get_formatted_text(raw_text, 40) == expected_text
+
+    def test_must_raise_error_if_length_lower_10(self):
+        with pytest.raises(ValueError) as ex:
+            utils.get_formatted_text('ugly text', 9)
+
+        assert ex.value.args[0] == \
+            'Max length can not be lower than 10.'

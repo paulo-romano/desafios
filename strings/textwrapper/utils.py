@@ -32,7 +32,11 @@ def get_formatted_text(text, max_length):
     :type text: str
     :param max_length:
     :type max_length: int
+    :raise ValueError
     :return: Formatted text
     :rtype: str
     """
+    if max_length < 10:
+        raise ValueError('Max length can not be lower than 10.')
+
     return _join_lines(_wrap_text(text, max_length))

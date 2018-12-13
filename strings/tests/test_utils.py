@@ -68,3 +68,18 @@ class TestJoinLines:
             self, lines, expected_text):
         _join_lines = self._get_join_lines_function()
         assert _join_lines(lines) == expected_text
+
+
+class TestGetFormattedText:
+    def test_must_return_formatted_text(self):
+        raw_text = \
+            'And God said, "Let there be light," and there was light. ' \
+            'God saw that the light was good, and he separated the light ' \
+            'from the darkness.'
+
+        expected_text = 'And God said, "Let there be light," and\n' \
+                        'there was light. God saw that the light\n' \
+                        'was good, and he separated the light\n' \
+                        'from the darkness.'
+
+        assert utils.get_formatted_text(raw_text, 40) == expected_text

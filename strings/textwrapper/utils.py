@@ -23,3 +23,7 @@ def _join_lines(lines):
     :rtype: str
     """
     return '\n'.join(lines)
+
+
+def get_formatted_text(text, max_length):
+    return _join_lines(_wrap_text(text, max_length))

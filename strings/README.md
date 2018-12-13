@@ -40,7 +40,7 @@ Para facilitar a implementação de comandos administrativos será utilizado a b
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python textwrapper <long_ugly_text>
+python textwrapper <long_ugly_text> [--max-length 40]
 ```
 
 ## Como executar os testes

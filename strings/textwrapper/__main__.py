@@ -7,11 +7,9 @@ import utils
 @click.argument('text')
 @click.option('--max-length', default=40)
 @utils.command_surrounded_by_frame
+@utils.command_exception_handler
 def textwrapper(text, max_length):
-    try:
-        print(utils.get_formatted_text(text, max_length))
-    except Exception as ex:
-        print(f'Error: {ex}')
+    print(utils.get_formatted_text(text, max_length))
 
 
 if __name__ == '__main__':

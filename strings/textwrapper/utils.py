@@ -56,3 +56,20 @@ def command_surrounded_by_frame(func):
         print('=' * max_length)
 
     return inner
+
+
+def command_exception_handler(func):
+    """Handle with command execution errors
+
+    :param func: Original function
+    :return: new callable
+    :rtype: callable
+    """
+    def inner(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception as ex:
+            message = ex if any(ex.args) else type(ex).__name__
+            print(f'Error: {message}')
+
+    return inner

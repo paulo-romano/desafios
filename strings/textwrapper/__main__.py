@@ -13,7 +13,7 @@ def command_group():
     short_help='Split text into lines.'
 )
 @click.argument('text')
-@click.option('--max-length', default=40)
+@click.option('--max-length', default=40, help='Max line column length.')
 @utils.command_surrounded_by_frame
 @utils.command_exception_handler
 def textwrapper(text, max_length):

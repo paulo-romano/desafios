@@ -40,3 +40,19 @@ def get_formatted_text(text, max_length):
         raise ValueError('Max length can not be lower than 10.')
 
     return _join_lines(_wrap_text(text, max_length))
+
+
+def command_surrounded_by_frame(func):
+    """Surround given function execution with a frame.
+
+    :param func: Original function
+    :return: new callable
+    :rtype: callable
+    """
+    def inner(*args, **kwargs):
+        max_length = kwargs.get('max_length', 0)
+        print('=' * max_length)
+        func(*args, **kwargs)
+        print('=' * max_length)
+
+    return inner

@@ -90,3 +90,23 @@ class TestGetFormattedText:
 
         assert ex.value.args[0] == \
             'Max length can not be lower than 10.'
+
+
+class TestCommandSurroundedByFrame:
+    @pytest.mark.parametrize('max_length', (
+        10, 20, 30
+    ))
+    def test_must_print_frame_using_max_length_value(
+            self, mocker, max_length):
+        @utils.command_surrounded_by_frame
+        def decorated_func(text, max_length=40):
+            pass
+
+        mocked_print = mocker.patch('builtins.print')
+        decorated_func('ugly text', max_length=max_length)
+        assert mocked_print.called is True
+        assert mocked_print.call_count == 2
+        assert mocked_print.call_args_list[0] == \
+            mocker.call('=' * max_length)
+        assert mocked_print.call_args_list[1] == \
+            mocker.call('=' * max_length)

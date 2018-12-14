@@ -130,3 +130,33 @@ class TestCommandExceptionHandler:
         assert mocked_print.called is True
         assert mocker.call(expected_message) in \
             mocked_print.call_args_list
+
+
+class TestReadTextFromFile:
+    def test_must_return_text_from_file(self, mocker):
+        file_name = 'fake_file'
+        expected_return_value = 'fake_text'
+        mocked_file = mocker.MagicMock()
+        mocked_file.read.return_value = \
+            expected_return_value
+
+        mocked_open = mocker.MagicMock()
+        mocked_open.__enter__.return_value = mocked_file
+
+        mocked_open = mocker.patch(
+            'builtins.open', return_value=mocked_open)
+
+        text = utils.read_text_from_file('fake_file')
+
+        assert text == expected_return_value
+        assert mocked_open.called is True
+        assert mocker.call(file_name) in \
+            mocked_open.call_args_list
+
+    def test_must_raise_custom_exception(self, mocker):
+        mocker.patch('builtins.open', side_effect=FileNotFoundError)
+        with pytest.raises(Exception) as ex:
+            utils.read_text_from_file('fake_file')
+
+        assert ex.value.args[0] == \
+            'Can not read "fake_file" file.'

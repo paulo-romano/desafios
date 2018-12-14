@@ -73,3 +73,14 @@ def command_exception_handler(func):
             print(f'Error: {message}')
 
     return inner
+
+
+def read_text_from_file(file_path):
+    try:
+        with open(file_path) as file:
+            text = file.read()
+        return text
+    except Exception:
+        raise Exception(
+            f'Can not read "{file_path}" file.'
+        ) from None

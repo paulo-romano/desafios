@@ -41,6 +41,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python textwrapper text '<long_ugly_text>' [--max-length 40]
+python textwrapper file <file_path> [--max-length 40]
 ```
 
 ## Como executar os testes

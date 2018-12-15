@@ -40,6 +40,15 @@ def _fill_with_spaces(words, remaining_spaces):
 
 
 def justify(text, max_length):
+    """Add full justify to given text.
+
+    :param text: Text to be justified
+    :type text: str
+    :param max_length: Max length of line
+    :type max_length: int
+    :return: Justified text
+    :rtype: str
+    """
     text_length = len(text)
 
     if text_length == max_length:
@@ -61,7 +70,7 @@ def justify(text, max_length):
 def _justifier(max_length, justify_text):
     """Return a preconfigured justify function.
 
-    :param max_length:
+    :param max_length: Max length of line
     :type max_length: int
     :param justify_text: If true text will be full justified.
     :type justify_text: bool
@@ -80,7 +89,7 @@ def get_formatted_text(text, max_length, justify_text=False):
 
     :param text: Text to be wrapped
     :type text: str
-    :param max_length:
+    :param max_length: Max length of line
     :type max_length: int
     :param justify_text: If true text will be full justified.
     :type justify_text: bool

@@ -58,7 +58,16 @@ def justify(text, max_length):
     return ' '.join(words)
 
 
-def _justify_factory(max_length, justify_text):
+def _justifier(max_length, justify_text):
+    """Return a preconfigured justify function.
+
+    :param max_length:
+    :type max_length: int
+    :param justify_text: If true text will be full justified.
+    :type justify_text: bool
+    :return: Preconfigured justify function.
+    :rtype: callable
+    """
     def inner(text):
         return justify(text, max_length) \
             if justify_text else text
@@ -84,7 +93,7 @@ def get_formatted_text(text, max_length, justify_text=False):
 
     lines = _wrap_text(text, max_length)
 
-    lines = map(_justify_factory(max_length, justify_text), lines)
+    lines = map(_justifier(max_length, justify_text), lines)
 
     return _join_lines(lines)
 

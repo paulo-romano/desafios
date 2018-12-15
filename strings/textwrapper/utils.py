@@ -25,6 +25,20 @@ def _join_lines(lines):
     return '\n'.join(lines)
 
 
+def _fill_with_spaces(words, remaining_spaces):
+    if not remaining_spaces:
+        return words
+
+    for index in range(1, len(words)):
+        words[index] = words[index].rjust(len(words[index]) + 1)
+        remaining_spaces -= 1
+
+        if not remaining_spaces:
+            break
+
+    return _fill_with_spaces(words, remaining_spaces)
+
+
 def justify(text, max_length):
     text_length = len(text)
 
@@ -38,13 +52,8 @@ def justify(text, max_length):
         return f'{words[0]}{" " * remaining_spaces}{words[1]}'
 
     remaining_spaces = (max_length - text_length)
-    while remaining_spaces:
-        for index in range(1, len(words)):
-            words[index] = words[index].rjust(len(words[index]) + 1)
-            remaining_spaces -= 1
 
-            if not remaining_spaces:
-                break
+    words = _fill_with_spaces(words, remaining_spaces)
 
     return ' '.join(words)
 

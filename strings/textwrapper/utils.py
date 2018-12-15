@@ -76,6 +76,14 @@ def command_exception_handler(func):
 
 
 def read_text_from_file(file_path):
+    """Read content from file.
+
+    :param file_path: File path
+    :type file_path: str
+    :raises Exception
+    :return: File content
+    :rtype: str
+    """
     try:
         with open(file_path) as file:
             text = file.read()

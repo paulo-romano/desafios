@@ -160,3 +160,13 @@ class TestReadTextFromFile:
 
         assert ex.value.args[0] == \
             'Can not read "fake_file" file.'
+
+
+class TestJustify:
+    @pytest.mark.parametrize('text, max_length, expected_text', (
+        ('God spoken', 10, 'God spoken'),
+        ('God spoken', 15, 'God     spoken'),
+        ('God have not spoken', 30, 'God     have     not    spoken'),
+    ))
+    def test_must_justify_text(self, text, max_length, expected_text):
+        assert utils.justify(text, max_length) == expected_text

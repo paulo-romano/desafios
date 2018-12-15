@@ -25,13 +25,47 @@ def _join_lines(lines):
     return '\n'.join(lines)
 
 
-def get_formatted_text(text, max_length):
+def justify(text, max_length):
+    text_length = len(text)
+
+    if text_length == max_length:
+        return text
+
+    words = text.split(' ')
+
+    if len(words) == 2:
+        remaining_spaces = max_length - text_length
+        return f'{words[0]}{" " * remaining_spaces}{words[1]}'
+
+    remaining_spaces = (max_length - text_length)
+    while remaining_spaces:
+        for index in range(1, len(words)):
+            words[index] = words[index].rjust(len(words[index]) + 1)
+            remaining_spaces -= 1
+
+            if not remaining_spaces:
+                break
+
+    return ' '.join(words)
+
+
+def _justify_factory(max_length, justify_text):
+    def inner(text):
+        return justify(text, max_length) \
+            if justify_text else text
+
+    return inner
+
+
+def get_formatted_text(text, max_length, justify_text=False):
     """Return formatted text.
 
     :param text: Text to be wrapped
     :type text: str
     :param max_length:
     :type max_length: int
+    :param justify_text: If true text will be full justified.
+    :type justify_text: bool
     :raise ValueError
     :return: Formatted text
     :rtype: str
@@ -39,7 +73,11 @@ def get_formatted_text(text, max_length):
     if max_length < 10:
         raise ValueError('Max length can not be lower than 10.')
 
-    return _join_lines(_wrap_text(text, max_length))
+    lines = _wrap_text(text, max_length)
+
+    lines = map(_justify_factory(max_length, justify_text), lines)
+
+    return _join_lines(lines)
 
 
 def command_surrounded_by_frame(func):

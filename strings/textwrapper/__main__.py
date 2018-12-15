@@ -14,10 +14,12 @@ def command_group():
 )
 @click.argument('text')
 @click.option('--max-length', default=40, help='Max line column length.')
+@click.option('--justify', '-j', default=False, multiple=True,
+              is_flag=True, help='Justify text')
 @utils.command_surrounded_by_frame
 @utils.command_exception_handler
-def text_wrapper(text, max_length):
-    print(utils.get_formatted_text(text, max_length))
+def text_wrapper(text, max_length, justify):
+    print(utils.get_formatted_text(text, max_length, justify))
 
 
 @command_group.command(
@@ -26,13 +28,16 @@ def text_wrapper(text, max_length):
 )
 @click.argument('file_path')
 @click.option('--max-length', default=40, help='Max line column length.')
+@click.option('--justify', '-j', default=False, multiple=True,
+              is_flag=True, help='Justify text')
 @utils.command_surrounded_by_frame
 @utils.command_exception_handler
-def file_wrapper(file_path, max_length):
+def file_wrapper(file_path, max_length, justify):
     print(
         utils.get_formatted_text(
             utils.read_text_from_file(file_path),
-            max_length)
+            max_length,
+            justify)
     )
 
 

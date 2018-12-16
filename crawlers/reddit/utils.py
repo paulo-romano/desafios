@@ -29,3 +29,14 @@ def command_exception_handler(func):
             print(f'Error: {message}')
 
     return inner
+
+
+def _split_subreddit_names(subreddit_names):
+    """Split subreddit names into a tuple.
+
+    :param subreddit_names: Name of subbreddits separated by ";".
+    :type subreddit_names: str
+    :return: Tuple with subreddit names.
+    :rtype: tuple
+    """
+    return tuple(name for name in subreddit_names.split(';') if name)

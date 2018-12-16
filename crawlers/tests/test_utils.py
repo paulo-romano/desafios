@@ -39,3 +39,21 @@ class TestCommandExceptionHandler:
         assert mocked_print.called is True
         assert mocker.call(expected_message) in \
             mocked_print.call_args_list
+
+
+class TestSplitSubRedditNames:
+    @staticmethod
+    def _get_split_subreddit_names_function():
+        return getattr(utils, '_split_subreddit_names')
+
+    @pytest.mark.parametrize('subreddit_names, expected_values', (
+        ('cats', ('cats',)),
+        ('cats;', ('cats',)),
+        (';cats', ('cats',)),
+        (';cats;', ('cats',)),
+        ('cats;dogs', ('cats', 'dogs')),
+        ('cats;dogs;cows', ('cats', 'dogs', 'cows')),
+    ))
+    def test_must_split(self, subreddit_names, expected_values):
+        _split_subreddit_names = self._get_split_subreddit_names_function()
+        assert _split_subreddit_names(subreddit_names) == expected_values

@@ -64,6 +64,14 @@ def _request_reddit(subreddit_name):
         raise Exception(f'Can not request "{subreddit_name}".') from None
 
 
+def _parse_response(response):
+    from bs4 import BeautifulSoup
+    try:
+        return BeautifulSoup(response.content)
+    except Exception:
+        raise Exception(f'Can not parse response.') from None
+
+
 def get_reddits(subreddit_names):
     subreddits = _split_subreddit_names(subreddit_names)
 

@@ -1,5 +1,6 @@
 import pytest
 import requests
+from bs4 import BeautifulSoup
 
 from reddit import utils
 
@@ -98,6 +99,29 @@ class TestRequestReddit:
 
         assert mocked_request_get.called is True
         assert ex.value.args[0] == f'Can not request "{subreddit_name}".'
+
+
+class TestParseResponse:
+    @staticmethod
+    def _get_parse_response_function():
+        return getattr(utils, '_parse_response')
+
+    def test_must_raise_error(self, mocker):
+        fake_response = requests.Response()
+        setattr(fake_response, '_content', 'fake_content')
+
+        __init__ = mocker.patch.object(
+            BeautifulSoup, '__init__', side_effect=Exception)
+
+        _parse_response = self._get_parse_response_function()
+
+        with pytest.raises(Exception) as ex:
+            _parse_response(fake_response)
+
+        assert __init__.called is True
+        assert mocker.call(fake_response.content) in \
+            __init__.call_args_list
+        assert ex.value.args[0] == 'Can not parse response.'
 
 
 class TestGetReddits:

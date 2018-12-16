@@ -119,7 +119,7 @@ class TestParseResponse:
             _parse_response(fake_response)
 
         assert __init__.called is True
-        assert mocker.call(fake_response.content) in \
+        assert mocker.call(fake_response.content, 'html.parser') in \
             __init__.call_args_list
         assert ex.value.args[0] == 'Can not parse response.'
 
@@ -130,7 +130,8 @@ class TestParseResponse:
         fake_items = 'fake_items'
 
         __new__ = mocker.patch.object(
-            BeautifulSoup, '__new__', return_value=BeautifulSoup())
+            BeautifulSoup, '__new__',
+            return_value=BeautifulSoup('', 'html.parser'))
 
         _parse_reddit_items = mocker.patch(
             'reddit.utils._parse_reddit_items',

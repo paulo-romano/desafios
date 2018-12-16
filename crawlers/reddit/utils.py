@@ -85,7 +85,7 @@ def _parse_response(response):
     from bs4 import BeautifulSoup
     try:
         return _parse_reddit_items(
-            BeautifulSoup(response.content)
+            BeautifulSoup(response.content, 'html.parser')
         )
 
     except Exception:

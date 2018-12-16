@@ -29,3 +29,28 @@ Construir um robô que nos envie essa lista via Telegram sempre que receber o co
 ### Dicas
  - Use https://old.reddit.com/
  - Qualquer método para coletar os dados é válido. Caso não saiba por onde começar, procure por JSoup (Java), SeleniumHQ (Java), PhantomJS (Javascript) e Beautiful Soup (Python).
+ 
+ ## Notas de desenvolvimento
+Para facilitar a implementação de comandos administrativos será utilizado a biblioteca [click](https://click.palletsprojects.com/en/7.x/).
+
+## Como executar
+1. Crie um ambiente virtual.
+2. Ative o ambiente virtual.
+3. Instale as dependências.
+4. Execute o comando.
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python reddit '<name_of_subreddit>'
+```
+
+## Como executar os testes
+1. Siga os passos 1 e 2 da sessão "Como executar" acima.
+2. Instale as dependências de desenvolvimento.
+3. Execute o tox.
+```bash
+pip install -r requirements-dev.txt
+tox
+```
+

@@ -95,7 +95,7 @@ def _parse_response(response):
 def get_reddits(subreddit_names):
     subreddits = _split_subreddit_names(subreddit_names)
 
-    response = map(_request_reddit, subreddits)
-    response = map(_parse_response, response)
+    responses = map(_request_reddit, subreddits)
+    responses = map(_parse_response, responses)
 
-    return list(response)
+    return list(responses)

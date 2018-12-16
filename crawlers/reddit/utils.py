@@ -1,3 +1,13 @@
+BASE_URL = 'https://old.reddit.com'
+BASE_URL_SUBREDDIT = '/r/{subreddit}/top/'
+
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) '
+                  'AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/39.0.2171.95 Safari/537.36'
+}
+
+
 def command_surrounded_by_frame(func):
     """Surround given function execution with a frame.
 
@@ -40,6 +50,18 @@ def _split_subreddit_names(subreddit_names):
     :rtype: tuple
     """
     return tuple(name for name in subreddit_names.split(';') if name)
+
+
+def _request_reddit(subreddit_name):
+    import requests
+    try:
+        url = f'{BASE_URL}{BASE_URL_SUBREDDIT}'
+        return requests.get(
+            url.format(subreddit=subreddit_name),
+            headers=HEADERS,
+        )
+    except Exception:
+        raise Exception(f'Can not request "{subreddit_name}".') from None
 
 
 def get_reddits(subreddit_names):

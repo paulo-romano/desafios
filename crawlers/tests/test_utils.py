@@ -1,4 +1,5 @@
 import pytest
+import requests
 
 from reddit import utils
 
@@ -57,6 +58,46 @@ class TestSplitSubRedditNames:
     def test_must_split(self, subreddit_names, expected_values):
         _split_subreddit_names = self._get_split_subreddit_names_function()
         assert _split_subreddit_names(subreddit_names) == expected_values
+
+
+class TestRequestReddit:
+    @staticmethod
+    def _get_request_reddit_function():
+        return getattr(utils, '_request_reddit')
+
+    @staticmethod
+    def _get_url(subreddit_name):
+        return f'{utils.BASE_URL}{utils.BASE_URL_SUBREDDIT}' \
+               .format(subreddit=subreddit_name)
+
+    def test_must_request_reddit(self, mocker):
+        subreddit_name = 'cats'
+        fake_response = requests.Response()
+        url = self._get_url(subreddit_name)
+
+        mocked_request_get = \
+            mocker.patch('requests.get', return_value=fake_response)
+
+        _request_reddit = self._get_request_reddit_function()
+        _request_reddit(subreddit_name)
+
+        assert mocked_request_get.called is True
+        assert mocker.call(url, headers=utils.HEADERS) in \
+            mocked_request_get.call_args_list
+
+    def test_must_raise_error(self, mocker):
+        subreddit_name = 'cats'
+
+        mocked_request_get = \
+            mocker.patch('requests.get', side_effect=requests.Timeout)
+
+        _request_reddit = self._get_request_reddit_function()
+
+        with pytest.raises(Exception) as ex:
+            _request_reddit(subreddit_name)
+
+        assert mocked_request_get.called is True
+        assert ex.value.args[0] == f'Can not request "{subreddit_name}".'
 
 
 class TestGetReddits:

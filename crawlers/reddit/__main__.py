@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import click
 
 import utils
@@ -8,7 +10,7 @@ import utils
 @utils.command_surrounded_by_frame
 @utils.command_exception_handler
 def get_reddits(subreddits):
-    print(utils.get_reddits(subreddits))
+    pprint(utils.get_reddits(subreddits), indent=2)
 
 
 if __name__ == '__main__':

@@ -64,10 +64,30 @@ def _request_reddit(subreddit_name):
         raise Exception(f'Can not request "{subreddit_name}".') from None
 
 
+def _parse_reddit_items(soup):
+    threads = soup.find_all('div', {'class': 'thing'})
+
+    items = []
+    for thread in threads:
+
+        items.append({
+            'title': thread.find('a', {'class': 'title'}).text,
+            'link': thread.get('data-url'),
+            'upvotes': thread.get('data-score'),
+            'comments_link': f'{BASE_URL}{thread.get("data-permalink")}',
+            'subreddit_link': f'{BASE_URL}/r/{thread.get("data-subreddit")}',
+        })
+
+    return items
+
+
 def _parse_response(response):
     from bs4 import BeautifulSoup
     try:
-        return BeautifulSoup(response.content)
+        return _parse_reddit_items(
+            BeautifulSoup(response.content)
+        )
+
     except Exception:
         raise Exception(f'Can not parse response.') from None
 
@@ -75,4 +95,7 @@ def _parse_response(response):
 def get_reddits(subreddit_names):
     subreddits = _split_subreddit_names(subreddit_names)
 
-    return subreddits
+    response = map(_request_reddit, subreddits)
+    response = map(_parse_response, response)
+
+    return list(response)

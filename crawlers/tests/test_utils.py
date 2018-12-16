@@ -123,6 +123,26 @@ class TestParseResponse:
             __init__.call_args_list
         assert ex.value.args[0] == 'Can not parse response.'
 
+    def test_must_call_parse_reddit_items(self, mocker):
+        fake_response = requests.Response()
+        setattr(fake_response, '_content', 'fake_content')
+
+        fake_items = 'fake_items'
+
+        __new__ = mocker.patch.object(
+            BeautifulSoup, '__new__', return_value=BeautifulSoup())
+
+        _parse_reddit_items = mocker.patch(
+            'reddit.utils._parse_reddit_items',
+            return_value=fake_items
+        )
+
+        _parse_response = self._get_parse_response_function()
+        assert _parse_response(fake_response) == fake_items
+
+        assert __new__.called is True
+        assert _parse_reddit_items.called is True
+
 
 class TestGetReddits:
     def test_must_split_subreddit_names(self, mocker):

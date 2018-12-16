@@ -8,7 +8,7 @@ import utils
 @utils.command_surrounded_by_frame
 @utils.command_exception_handler
 def get_reddits(subreddits):
-    print(subreddits)
+    print(utils.get_reddits(subreddits))
 
 
 if __name__ == '__main__':

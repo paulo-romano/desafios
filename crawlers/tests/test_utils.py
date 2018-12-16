@@ -57,3 +57,14 @@ class TestSplitSubRedditNames:
     def test_must_split(self, subreddit_names, expected_values):
         _split_subreddit_names = self._get_split_subreddit_names_function()
         assert _split_subreddit_names(subreddit_names) == expected_values
+
+
+class TestGetReddits:
+    def test_must_split_subreddit_names(self, mocker):
+        _split_subreddit_names = \
+            mocker.patch('reddit.utils._split_subreddit_names')
+        subreddit_names = 'cats;bear'
+        utils.get_reddits(subreddit_names)
+        assert _split_subreddit_names.called is True
+        assert mocker.call(subreddit_names) in \
+            _split_subreddit_names.call_args_list

@@ -40,3 +40,9 @@ def _split_subreddit_names(subreddit_names):
     :rtype: tuple
     """
     return tuple(name for name in subreddit_names.split(';') if name)
+
+
+def get_reddits(subreddit_names):
+    subreddits = _split_subreddit_names(subreddit_names)
+
+    return subreddits

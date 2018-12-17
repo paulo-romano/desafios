@@ -37,6 +37,8 @@ Cada requisição à um subreddit é feita em paralelo utilizanod asyncio e thre
 
 Para facilitar a implementação de comandos administrativos será utilizado a biblioteca [click](https://click.palletsprojects.com/en/7.x/).
 
+Como nunca criei um bot de telegram, vou seguir [este](https://medium.freecodecamp.org/how-to-build-a-server-less-telegram-bot-227f842f4706) artigo para criar o bot do telegram. 
+
 Implementei alguns parâmetros opcionais:
 - [--log / -l] Ativa a exibição e logs.
 - [--min-upvotes 5000] Muda o valor do filtro do valor de up votes (o valor padrão é 5000). 
@@ -61,4 +63,29 @@ python reddit '<name_of_subreddit>' [--log / -l] [--min-upvotes 5000]
 pip install -r requirements-dev.txt
 tox
 ```
+
+
+## Como rodar e configurar o bot do telegram
+
+### Configurando instancia
+1. Copie o exemplo do arquivo .env para a raiz do projeto.
+2. Crie um telegram bot via [BotFather](https://telegram.me/botfather) e salve o token na variável BOT_TOKEN do arquivo .env.
+```bash
+cp contrib/env.sample .env
+``` 
+
+### Execute o NGROK
+1. Faça login no NGROK. Crie conta / token em [aqui](https://dashboard.ngrok.com/get-started).
+2. Execute o tunel na porta 8000. Salve o endereço (algo como "https://c0cf0a5e.ngrok.io/") https na variável NGROK_URL do arquivo .env.
+```bash
+./contib/ngrok authtoken <token>
+./contrib/ngrok http 8000
+```
+
+### Execute o web app.
+1. Execute utilizando o gunicorn.
+```bash
+gunicorn reddit:app
+```
+
 

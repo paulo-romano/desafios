@@ -175,6 +175,25 @@ class TestUnpack:
         assert _unpack(value) == expected
 
 
+class TestFilterByUpvotes:
+    @staticmethod
+    def _get_filter_by_upvotes_function():
+        return getattr(utils, '_filter_by_upvotes')
+
+    def test_must_return_upacked_valeu(self):
+        value = [
+            {'upvotes': 1},
+            {'upvotes': 5},
+            {'upvotes': 9},
+            {'upvotes': 10},
+            {'upvotes': 20},
+        ]
+        expected_length = 2
+        _filter_by_upvotes = self._get_filter_by_upvotes_function()
+
+        assert len(_filter_by_upvotes(value, 10)) == expected_length
+
+
 class TestGetReddits:
     fake_response = requests.Response()
     subreddit_names = 'cats;bear'
@@ -201,12 +220,17 @@ class TestGetReddits:
         return mocker.patch('reddit.utils._unpack',
                             return_value=self.expected_value)
 
+    def _mock_filter_by_upvotes(self, mocker):
+        return mocker.patch('reddit.utils._filter_by_upvotes',
+                            return_value=self.expected_value)
+
     def test_must_return_expected_value(self, mocker):
         self._mock_parse_response(mocker)
         self._mock_request_concurrent(mocker)
         self._mock_request_concurrent_next_pages(mocker)
         self._mock_split_subreddit_names(mocker)
         self._mock_unpack(mocker)
+        self._mock_filter_by_upvotes(mocker)
 
         assert utils.get_reddits(self.subreddit_names) == \
             self.expected_value
@@ -215,6 +239,7 @@ class TestGetReddits:
         self._mock_parse_response(mocker)
         self._mock_request_concurrent(mocker)
         self._mock_request_concurrent_next_pages(mocker)
+        self._mock_filter_by_upvotes(mocker)
 
         _split_subreddit_names = self._mock_split_subreddit_names(mocker)
 
@@ -229,6 +254,7 @@ class TestGetReddits:
         self._mock_parse_response(mocker)
         self._mock_split_subreddit_names(mocker)
         self._mock_request_concurrent_next_pages(mocker)
+        self._mock_filter_by_upvotes(mocker)
 
         _request_concurrent = self._mock_request_concurrent(mocker)
 
@@ -242,6 +268,7 @@ class TestGetReddits:
         self._mock_parse_response(mocker)
         self._mock_split_subreddit_names(mocker)
         self._mock_request_concurrent(mocker)
+        self._mock_filter_by_upvotes(mocker)
 
         _request_concurrent_next_page = \
             self._mock_request_concurrent_next_pages(mocker)
@@ -254,6 +281,7 @@ class TestGetReddits:
         self._mock_request_concurrent(mocker)
         self._mock_split_subreddit_names(mocker)
         self._mock_request_concurrent_next_pages(mocker)
+        self._mock_filter_by_upvotes(mocker)
 
         _parse_response = self._mock_parse_response(mocker)
 

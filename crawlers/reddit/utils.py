@@ -119,7 +119,7 @@ def _parse_reddit_items(soup):
         items.append({
             'title': tittle,
             'link': link,
-            'upvotes': thread.get('data-score'),
+            'upvotes': int(thread.get('data-score')),
             'comments_link': f'{BASE_URL}{thread.get("data-permalink")}',
             'subreddit_link': f'{BASE_URL}/r/{thread.get("data-subreddit")}',
         })
@@ -207,12 +207,22 @@ def _unpack(parsed_responses):
     return [item for items in parsed_responses for item in items]
 
 
-def get_reddits(subreddit_names):
+def _filter_by_upvotes(parsed_responses, min_upvotes):
+    return list(
+        filter(
+            lambda item: item.get('upvotes', 0) >= min_upvotes,
+            parsed_responses
+        )
+    )
+
+
+def get_reddits(subreddit_names, min_upvotes=5000):
     responses = []
     responses += _request_concurrent(_split_subreddit_names(subreddit_names))
     responses += _request_concurrent_next_pages(responses)
 
     parsed_responses = map(_parse_response, responses)
     parsed_responses = _unpack(parsed_responses)
+    parsed_responses = _filter_by_upvotes(parsed_responses, min_upvotes)
 
     return parsed_responses

@@ -42,7 +42,7 @@ Para facilitar a implementação de comandos administrativos será utilizado a b
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python reddit '<name_of_subreddit>' [--log / -l]
+python reddit '<name_of_subreddit>' [--log / -l] [--min-upvotes 1000]
 ```
 
 ## Como executar os testes

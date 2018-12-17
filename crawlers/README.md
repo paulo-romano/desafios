@@ -85,7 +85,7 @@ cp contrib/env.sample .env
 ### Execute o web app.
 1. Execute utilizando o gunicorn.
 ```bash
-gunicorn reddit:app
+gunicorn reddit:app -t 5000
 ```
 
 

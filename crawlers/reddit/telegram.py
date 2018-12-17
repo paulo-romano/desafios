@@ -1,8 +1,11 @@
+import json
 from pprint import pprint
 from decouple import config
 
 import requests
 from flask import Flask, request
+
+from . import utils
 
 app = Flask(__name__)
 
@@ -17,7 +20,17 @@ def _get_url(method):
 def _process_message(update):
     data = {}
     data["chat_id"] = update["message"]["from"]["id"]
-    data["text"] = "I can hear you!"
+
+    if update["message"]["text"].lower().find('nadaprafazer') == 1:
+        command = update["message"]["text"].split()
+        if len(command) >= 2:
+            threads = json.dumps(utils.get_reddits(command[1], 5000), indent=2)
+            data["text"] = threads
+        else:
+            data["text"] = "Exemplo: /NadaPraFazer cats;dogs"
+    else:
+        data["text"] = "Help: /NadaPraFazer [+ Lista de subrredits]"
+
     requests.post(_get_url("sendMessage"), data=data)
 
 

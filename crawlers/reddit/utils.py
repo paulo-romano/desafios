@@ -72,10 +72,13 @@ def _parse_reddit_items(soup):
 
     items = []
     for thread in threads:
+        link = f'{BASE_URL}{thread.get("data-url")}' \
+            if thread.get("data-url").startswith('/r/') \
+            else thread.get("data-url")
 
         items.append({
             'title': thread.find('a', {'class': 'title'}).text,
-            'link': thread.get('data-url'),
+            'link': link,
             'upvotes': thread.get('data-score'),
             'comments_link': f'{BASE_URL}{thread.get("data-permalink")}',
             'subreddit_link': f'{BASE_URL}/r/{thread.get("data-subreddit")}',

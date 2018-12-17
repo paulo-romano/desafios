@@ -88,4 +88,7 @@ cp contrib/env.sample .env
 gunicorn reddit:app -t 5000
 ```
 
+### Chame o bot
+1. Na janela do chat com seu bot, simplesmente escreva (e envie) /NadaPraFazer cats;dogs e receba todos os threads com mais de 5000 upvotes dos subreddits indicados.
+
 

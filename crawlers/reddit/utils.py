@@ -1,8 +1,11 @@
 import asyncio
 import concurrent
 
+from bs4 import BeautifulSoup
+
 BASE_URL = 'https://old.reddit.com'
 BASE_URL_SUBREDDIT = '/r/{subreddit}/top/'
+MAX_PAGES = 5
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) '
@@ -55,16 +58,21 @@ def _split_subreddit_names(subreddit_names):
     return tuple(name for name in subreddit_names.split(';') if name)
 
 
-def _request_reddit(subreddit_name):
+def _request_url(url):
     import requests
     try:
-        url = f'{BASE_URL}{BASE_URL_SUBREDDIT}'
         return requests.get(
-            url.format(subreddit=subreddit_name),
+            url,
             headers=HEADERS,
         )
     except Exception:
-        raise Exception(f'Can not request "{subreddit_name}".') from None
+        raise Exception(f'Can not request "{url}".') from None
+
+
+def _request_subreddit(subreddit_name):
+    url = f'{BASE_URL}{BASE_URL_SUBREDDIT}' \
+          .format(subreddit=subreddit_name)
+    return _request_url(url)
 
 
 def _parse_reddit_items(soup):
@@ -88,7 +96,6 @@ def _parse_reddit_items(soup):
 
 
 def _parse_response(response):
-    from bs4 import BeautifulSoup
     try:
         return _parse_reddit_items(
             BeautifulSoup(response.content, 'html.parser')
@@ -111,17 +118,54 @@ def _request_concurrent(subreddits):
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
         futures = [
-            loop.run_in_executor(pool, _request_reddit, subreddit_name)
+            loop.run_in_executor(pool, _request_subreddit, subreddit_name)
             for subreddit_name in subreddits
         ]
 
     loop.run_until_complete(asyncio.wait(futures))
+    loop.close()
 
     return [future.result() for future in futures]
 
 
-def get_reddits(subreddit_names):
-    responses = _request_concurrent(_split_subreddit_names(subreddit_names))
-    responses = map(_parse_response, responses)
+def _get_next_page_url(response):
+    soup = BeautifulSoup(response.content, 'html.parser')
+    try:
+        next_button = soup.find('span', {'class': 'next-button'})
+        return next_button.find('a').get('href')
+    except Exception:
+        return None
 
-    return list(responses)
+
+def _request_concurrent_next_pages(responses, current_page=0):
+    if current_page == MAX_PAGES:
+        return responses
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+        futures = [
+            loop.run_in_executor(
+                pool, _request_url, _get_next_page_url(response)
+            )
+            for response in responses
+            if _get_next_page_url(response)
+        ]
+
+    loop.run_until_complete(asyncio.wait(futures))
+    loop.close()
+
+    responses = [future.result() for future in futures]
+
+    return _request_concurrent_next_pages(responses, current_page + 1)
+
+
+def get_reddits(subreddit_names):
+    responses = []
+    responses += _request_concurrent(_split_subreddit_names(subreddit_names))
+    responses += _request_concurrent_next_pages(responses)
+
+    parsed_responses = map(_parse_response, responses)
+
+    return list(parsed_responses)

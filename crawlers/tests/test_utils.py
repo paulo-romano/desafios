@@ -63,8 +63,8 @@ class TestSplitSubRedditNames:
 
 class TestRequestReddit:
     @staticmethod
-    def _get_request_reddit_function():
-        return getattr(utils, '_request_reddit')
+    def _get_request_subreddit_function():
+        return getattr(utils, '_request_subreddit')
 
     @staticmethod
     def _get_url(subreddit_name):
@@ -79,7 +79,7 @@ class TestRequestReddit:
         mocked_request_get = \
             mocker.patch('requests.get', return_value=fake_response)
 
-        _request_reddit = self._get_request_reddit_function()
+        _request_reddit = self._get_request_subreddit_function()
         _request_reddit(subreddit_name)
 
         assert mocked_request_get.called is True
@@ -92,13 +92,14 @@ class TestRequestReddit:
         mocked_request_get = \
             mocker.patch('requests.get', side_effect=requests.Timeout)
 
-        _request_reddit = self._get_request_reddit_function()
+        _request_reddit = self._get_request_subreddit_function()
 
         with pytest.raises(Exception) as ex:
             _request_reddit(subreddit_name)
 
         assert mocked_request_get.called is True
-        assert ex.value.args[0] == f'Can not request "{subreddit_name}".'
+        assert ex.value.args[0] == f'Can not request "https://old.reddit' \
+                                   f'.com/r/{subreddit_name}/top/".'
 
 
 class TestParseResponse:
@@ -175,6 +176,10 @@ class TestGetReddits:
         return mocker.patch('reddit.utils._request_concurrent',
                             return_value=[self.fake_response])
 
+    def _mock_request_concurrent_next_pages(self, mocker):
+        return mocker.patch('reddit.utils._request_concurrent_next_pages',
+                            return_value=[self.fake_response])
+
     def _mock_parse_response(self, mocker):
         return mocker.patch('reddit.utils._parse_response',
                             return_value=self.expected_value)
@@ -182,25 +187,30 @@ class TestGetReddits:
     def test_must_return_expected_value(self, mocker):
         self._mock_parse_response(mocker)
         self._mock_request_concurrent(mocker)
+        self._mock_request_concurrent_next_pages(mocker)
         self._mock_split_subreddit_names(mocker)
 
-        assert utils.get_reddits(self.subreddit_names) == [self.expected_value]
+        assert utils.get_reddits(self.subreddit_names)[0] == \
+            self.expected_value
 
     def test_must_split_subreddit_names(self, mocker):
         self._mock_parse_response(mocker)
         self._mock_request_concurrent(mocker)
+        self._mock_request_concurrent_next_pages(mocker)
 
         _split_subreddit_names = self._mock_split_subreddit_names(mocker)
 
         utils.get_reddits(self.subreddit_names)
 
         assert _split_subreddit_names.called is True
+
         assert mocker.call(self.subreddit_names) in \
             _split_subreddit_names.call_args_list
 
     def test_must_request_concurrently(self, mocker):
         self._mock_parse_response(mocker)
         self._mock_split_subreddit_names(mocker)
+        self._mock_request_concurrent_next_pages(mocker)
 
         _request_concurrent = self._mock_request_concurrent(mocker)
 
@@ -210,9 +220,22 @@ class TestGetReddits:
         assert mocker.call(self.subreddits) in \
             _request_concurrent.call_args_list
 
+    def test_must_request__next_page_concurrently(self, mocker):
+        self._mock_parse_response(mocker)
+        self._mock_split_subreddit_names(mocker)
+        self._mock_request_concurrent(mocker)
+
+        _request_concurrent_next_page = \
+            self._mock_request_concurrent_next_pages(mocker)
+
+        utils.get_reddits(self.subreddit_names)
+
+        assert _request_concurrent_next_page.called is True
+
     def test_must_parse_response(self, mocker):
         self._mock_request_concurrent(mocker)
         self._mock_split_subreddit_names(mocker)
+        self._mock_request_concurrent_next_pages(mocker)
 
         _parse_response = self._mock_parse_response(mocker)
 

@@ -1,5 +1,7 @@
 import asyncio
 import concurrent
+import logging
+import sys
 
 from bs4 import BeautifulSoup
 
@@ -47,6 +49,28 @@ def command_exception_handler(func):
     return inner
 
 
+def command_logging(func):
+    """Activate command logging
+
+    :param func: Original function
+    :return: new callable
+    :rtype: callable
+    """
+    def inner(*args, **kwargs):
+        if kwargs.get('log'):
+            reddit = logging.getLogger()
+            reddit.setLevel(logging.DEBUG)
+
+            handler = logging.StreamHandler(sys.stdout)
+            handler.setLevel(logging.DEBUG)
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            reddit.addHandler(handler)
+        func(*args, **kwargs)
+
+    return inner
+
+
 def _split_subreddit_names(subreddit_names):
     """Split subreddit names into a tuple.
 
@@ -65,7 +89,8 @@ def _request_url(url):
             url,
             headers=HEADERS,
         )
-    except Exception:
+    except Exception as ex:
+        logging.error(f'Can not request. {ex}')
         raise Exception(f'Can not request "{url}".') from None
 
 
@@ -84,8 +109,12 @@ def _parse_reddit_items(soup):
             if thread.get("data-url").startswith('/r/') \
             else thread.get("data-url")
 
+        tittle = thread.find('a', {'class': 'title'}).text
+
+        logging.info(f'Found thread "{tittle}"')
+
         items.append({
-            'title': thread.find('a', {'class': 'title'}).text,
+            'title': tittle,
             'link': link,
             'upvotes': thread.get('data-score'),
             'comments_link': f'{BASE_URL}{thread.get("data-permalink")}',
@@ -101,7 +130,8 @@ def _parse_response(response):
             BeautifulSoup(response.content, 'html.parser')
         )
 
-    except Exception:
+    except Exception as ex:
+        logging.error(f'Can not parse response. {ex}')
         raise Exception(f'Can not parse response.') from None
 
 
@@ -116,16 +146,20 @@ def _request_concurrent(subreddits):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
-        futures = [
-            loop.run_in_executor(pool, _request_subreddit, subreddit_name)
-            for subreddit_name in subreddits
-        ]
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+            futures = [
+                loop.run_in_executor(pool, _request_subreddit, subreddit_name)
+                for subreddit_name in subreddits
+            ]
 
-    loop.run_until_complete(asyncio.wait(futures))
-    loop.close()
+        loop.run_until_complete(asyncio.wait(futures))
+        loop.close()
 
-    return [future.result() for future in futures]
+        return [future.result() for future in futures]
+    except Exception as ex:
+        logging.error(f'Can not execute requests as futures. {ex}')
+        return []
 
 
 def _get_next_page_url(response):
@@ -134,6 +168,7 @@ def _get_next_page_url(response):
         next_button = soup.find('span', {'class': 'next-button'})
         return next_button.find('a').get('href')
     except Exception:
+        logging.error(f'There is not next button on "{response.url}".')
         return None
 
 
@@ -144,21 +179,25 @@ def _request_concurrent_next_pages(responses, current_page=0):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
-        futures = [
-            loop.run_in_executor(
-                pool, _request_url, _get_next_page_url(response)
-            )
-            for response in responses
-            if _get_next_page_url(response)
-        ]
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+            futures = [
+                loop.run_in_executor(
+                    pool, _request_url, _get_next_page_url(response)
+                )
+                for response in responses
+                if _get_next_page_url(response)
+            ]
 
-    loop.run_until_complete(asyncio.wait(futures))
-    loop.close()
+        loop.run_until_complete(asyncio.wait(futures))
+        loop.close()
 
-    responses = [future.result() for future in futures]
+        responses = [future.result() for future in futures]
 
-    return _request_concurrent_next_pages(responses, current_page + 1)
+        return _request_concurrent_next_pages(responses, current_page + 1)
+    except Exception as ex:
+        logging.error(f'Can not execute requests as futures. {ex}')
+        return []
 
 
 def get_reddits(subreddit_names):

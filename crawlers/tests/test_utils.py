@@ -99,7 +99,7 @@ class TestRequestReddit:
 
         assert mocked_request_get.called is True
         assert ex.value.args[0] == f'Can not request "https://old.reddit' \
-                                   f'.com/r/{subreddit_name}/top/".'
+                                   f'.com/r/{subreddit_name}/".'
 
 
 class TestParseResponse:

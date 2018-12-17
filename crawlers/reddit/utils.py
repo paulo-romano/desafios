@@ -203,11 +203,16 @@ def _request_concurrent_next_pages(responses, current_page=0):
     return _request_concurrent_next_pages(responses, current_page + 1)
 
 
+def _unpack(parsed_responses):
+    return [item for items in parsed_responses for item in items]
+
+
 def get_reddits(subreddit_names):
     responses = []
     responses += _request_concurrent(_split_subreddit_names(subreddit_names))
     responses += _request_concurrent_next_pages(responses)
 
     parsed_responses = map(_parse_response, responses)
+    parsed_responses = _unpack(parsed_responses)
 
-    return list(parsed_responses)
+    return parsed_responses

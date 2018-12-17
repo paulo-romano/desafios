@@ -162,6 +162,19 @@ class TestRequestConcurrent:
         assert mocked_set_event_loop.called is True
 
 
+class TestUnpack:
+    @staticmethod
+    def _get_unpack_function():
+        return getattr(utils, '_unpack')
+
+    def test_must_return_upacked_valeu(self):
+        value = [[1, 2], [3, 4]]
+        expected = [1, 2, 3, 4]
+        _unpack = self._get_unpack_function()
+
+        assert _unpack(value) == expected
+
+
 class TestGetReddits:
     fake_response = requests.Response()
     subreddit_names = 'cats;bear'
@@ -184,13 +197,18 @@ class TestGetReddits:
         return mocker.patch('reddit.utils._parse_response',
                             return_value=self.expected_value)
 
+    def _mock_unpack(self, mocker):
+        return mocker.patch('reddit.utils._unpack',
+                            return_value=self.expected_value)
+
     def test_must_return_expected_value(self, mocker):
         self._mock_parse_response(mocker)
         self._mock_request_concurrent(mocker)
         self._mock_request_concurrent_next_pages(mocker)
         self._mock_split_subreddit_names(mocker)
+        self._mock_unpack(mocker)
 
-        assert utils.get_reddits(self.subreddit_names)[0] == \
+        assert utils.get_reddits(self.subreddit_names) == \
             self.expected_value
 
     def test_must_split_subreddit_names(self, mocker):

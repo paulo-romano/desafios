@@ -63,7 +63,10 @@ def command_logging(func):
 
             handler = logging.StreamHandler(sys.stdout)
             handler.setLevel(logging.DEBUG)
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            formatter = \
+                logging.Formatter(
+                    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                )
             handler.setFormatter(formatter)
             reddit.addHandler(handler)
         func(*args, **kwargs)
@@ -135,6 +138,26 @@ def _parse_response(response):
         raise Exception(f'Can not parse response.') from None
 
 
+def _execute_func_concurrent(request_function, params):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+            futures = [
+                loop.run_in_executor(pool, request_function, param)
+                for param in params
+            ]
+
+        loop.run_until_complete(asyncio.wait(futures))
+        loop.close()
+
+        return [future.result() for future in futures]
+    except Exception as ex:
+        logging.error(f'Can not execute requests as futures. {ex}')
+        return []
+
+
 def _request_concurrent(subreddits):
     """Request each subreddit concurrently.
 
@@ -146,20 +169,7 @@ def _request_concurrent(subreddits):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    try:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
-            futures = [
-                loop.run_in_executor(pool, _request_subreddit, subreddit_name)
-                for subreddit_name in subreddits
-            ]
-
-        loop.run_until_complete(asyncio.wait(futures))
-        loop.close()
-
-        return [future.result() for future in futures]
-    except Exception as ex:
-        logging.error(f'Can not execute requests as futures. {ex}')
-        return []
+    return _execute_func_concurrent(_request_subreddit, subreddits)
 
 
 def _get_next_page_url(response):
@@ -173,31 +183,24 @@ def _get_next_page_url(response):
 
 
 def _request_concurrent_next_pages(responses, current_page=0):
+    """Request for response next pages concurrently.
+
+    :param responses: List of requests.Response
+    :type responses: list
+    :return: List of request.Response.
+    :rtype: list
+    """
     if current_page == MAX_PAGES:
         return responses
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    urls = [
+        _get_next_page_url(response)
+        for response in responses
+        if _get_next_page_url(response)
+    ]
+    responses = _execute_func_concurrent(_request_url, urls)
 
-    try:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
-            futures = [
-                loop.run_in_executor(
-                    pool, _request_url, _get_next_page_url(response)
-                )
-                for response in responses
-                if _get_next_page_url(response)
-            ]
-
-        loop.run_until_complete(asyncio.wait(futures))
-        loop.close()
-
-        responses = [future.result() for future in futures]
-
-        return _request_concurrent_next_pages(responses, current_page + 1)
-    except Exception as ex:
-        logging.error(f'Can not execute requests as futures. {ex}')
-        return []
+    return _request_concurrent_next_pages(responses, current_page + 1)
 
 
 def get_reddits(subreddit_names):

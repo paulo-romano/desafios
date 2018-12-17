@@ -6,7 +6,7 @@ import sys
 from bs4 import BeautifulSoup
 
 BASE_URL = 'https://old.reddit.com'
-BASE_URL_SUBREDDIT = '/r/{subreddit}/top/'
+BASE_URL_SUBREDDIT = '/r/{subreddit}/'
 MAX_PAGES = 5
 
 HEADERS = {

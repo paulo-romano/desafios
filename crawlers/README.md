@@ -78,7 +78,7 @@ cp contrib/env.sample .env
 1. Faça login no NGROK. Crie conta / token em [aqui](https://dashboard.ngrok.com/get-started).
 2. Execute o tunel na porta 8000. Salve o endereço (algo como "https://c0cf0a5e.ngrok.io/") https na variável NGROK_URL do arquivo .env.
 ```bash
-./contib/ngrok authtoken <token>
+./contrib/ngrok authtoken <token>
 ./contrib/ngrok http 8000
 ```
 

@@ -1,4 +1,4 @@
-from pprint import pprint
+import json
 
 import click
 
@@ -23,7 +23,7 @@ import utils
 @utils.command_exception_handler
 @utils.command_logging
 def get_reddits(subreddits, log, min_upvotes):
-    pprint(utils.get_reddits(subreddits, min_upvotes), indent=2)
+    print(json.dumps(utils.get_reddits(subreddits, min_upvotes), indent=2))
 
 
 if __name__ == '__main__':

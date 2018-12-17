@@ -145,12 +145,79 @@ class TestParseResponse:
         assert _parse_reddit_items.called is True
 
 
+class TestRequestConcurrent:
+    @staticmethod
+    def _get_request_concurrent_function():
+        return getattr(utils, '_request_concurrent')
+
+    def test_must_set_a_new_loop(self, mocker):
+        mocked_new_event_loop = mocker.patch('asyncio.new_event_loop')
+        mocked_set_event_loop = mocker.patch('asyncio.set_event_loop')
+
+        _request_concurrent = self._get_request_concurrent_function()
+        _request_concurrent('car')
+
+        assert mocked_new_event_loop.called is True
+        assert mocked_set_event_loop.called is True
+
+
 class TestGetReddits:
+    fake_response = requests.Response()
+    subreddit_names = 'cats;bear'
+    subreddits = 'car', 'bear'
+    expected_value = 'expected_fake_value'
+
+    def _mock_split_subreddit_names(self, mocker):
+        return mocker.patch('reddit.utils._split_subreddit_names',
+                            return_value=self.subreddits)
+
+    def _mock_request_concurrent(self, mocker):
+        return mocker.patch('reddit.utils._request_concurrent',
+                            return_value=[self.fake_response])
+
+    def _mock_parse_response(self, mocker):
+        return mocker.patch('reddit.utils._parse_response',
+                            return_value=self.expected_value)
+
+    def test_must_return_expected_value(self, mocker):
+        self._mock_parse_response(mocker)
+        self._mock_request_concurrent(mocker)
+        self._mock_split_subreddit_names(mocker)
+
+        assert utils.get_reddits(self.subreddit_names) == [self.expected_value]
+
     def test_must_split_subreddit_names(self, mocker):
-        _split_subreddit_names = \
-            mocker.patch('reddit.utils._split_subreddit_names')
-        subreddit_names = 'cats;bear'
-        utils.get_reddits(subreddit_names)
+        self._mock_parse_response(mocker)
+        self._mock_request_concurrent(mocker)
+
+        _split_subreddit_names = self._mock_split_subreddit_names(mocker)
+
+        utils.get_reddits(self.subreddit_names)
+
         assert _split_subreddit_names.called is True
-        assert mocker.call(subreddit_names) in \
+        assert mocker.call(self.subreddit_names) in \
             _split_subreddit_names.call_args_list
+
+    def test_must_request_concurrently(self, mocker):
+        self._mock_parse_response(mocker)
+        self._mock_split_subreddit_names(mocker)
+
+        _request_concurrent = self._mock_request_concurrent(mocker)
+
+        utils.get_reddits(self.subreddit_names)
+
+        assert _request_concurrent.called is True
+        assert mocker.call(self.subreddits) in \
+            _request_concurrent.call_args_list
+
+    def test_must_parse_response(self, mocker):
+        self._mock_request_concurrent(mocker)
+        self._mock_split_subreddit_names(mocker)
+
+        _parse_response = self._mock_parse_response(mocker)
+
+        utils.get_reddits(self.subreddit_names)
+
+        assert _parse_response.called is True
+        assert mocker.call(self.fake_response) in \
+            _parse_response.call_args_list

@@ -1,3 +1,6 @@
+import asyncio
+import concurrent
+
 BASE_URL = 'https://old.reddit.com'
 BASE_URL_SUBREDDIT = '/r/{subreddit}/top/'
 
@@ -92,10 +95,30 @@ def _parse_response(response):
         raise Exception(f'Can not parse response.') from None
 
 
-def get_reddits(subreddit_names):
-    subreddits = _split_subreddit_names(subreddit_names)
+def _request_concurrent(subreddits):
+    """Request each subreddit concurrently.
 
-    responses = map(_request_reddit, subreddits)
+    :param subreddits: Tuple of subreddits.
+    :type subreddits: tuple
+    :return: List of request.Response.
+    :rtype: list
+    """
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+        futures = [
+            loop.run_in_executor(pool, _request_reddit, subreddit_name)
+            for subreddit_name in subreddits
+        ]
+
+    loop.run_until_complete(asyncio.wait(futures))
+
+    return [future.result() for future in futures]
+
+
+def get_reddits(subreddit_names):
+    responses = _request_concurrent(_split_subreddit_names(subreddit_names))
     responses = map(_parse_response, responses)
 
     return list(responses)

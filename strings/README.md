@@ -29,7 +29,12 @@ O exemplo de output está [neste arquivo](https://github.com/idwall/desafios/blo
 
 ## Notas de desenvolvimento
 Na biblioteca padrão do python 3.4+, existe o modulo [textwrap](https://docs.python.org/3.4/library/textwrap.html) que será utilizado para quebrar as linhas do texto.
+
 Para facilitar a implementação de comandos administrativos será utilizado a biblioteca [click](https://click.palletsprojects.com/en/7.x/).
+
+Implementei alguns parâmetros opcionais:
+- [--max-length 40] Muda o comprimento máximo da linha (o valor padrão é 40).
+- [--justify / -j] Ativa a formatação de texto como justificado (É uma flag, não há a necessidade de informar um valor). 
 
 ## Como executar
 1. Crie um ambiente virtual.

@@ -31,7 +31,15 @@ Construir um robô que nos envie essa lista via Telegram sempre que receber o co
  - Qualquer método para coletar os dados é válido. Caso não saiba por onde começar, procure por JSoup (Java), SeleniumHQ (Java), PhantomJS (Javascript) e Beautiful Soup (Python).
  
  ## Notas de desenvolvimento
+Utilizei Beautiful Soup para parsear a resposta gerada pela biblioteca [requests](http://docs.python-requests.org/en/master/).
+
+Cada requisição à um subreddit é feita em paralelo utilizanod asyncio e thread pool.
+
 Para facilitar a implementação de comandos administrativos será utilizado a biblioteca [click](https://click.palletsprojects.com/en/7.x/).
+
+Implementei alguns parâmetros opcionais:
+- [--log / -l] Ativa a exibição e logs.
+- [--min-upvotes 5000] Muda o valor do filtro do valor de up votes (o valor padrão é 5000). 
 
 ## Como executar
 1. Crie um ambiente virtual.
@@ -42,7 +50,7 @@ Para facilitar a implementação de comandos administrativos será utilizado a b
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python reddit '<name_of_subreddit>' [--log / -l] [--min-upvotes 1000]
+python reddit '<name_of_subreddit>' [--log / -l] [--min-upvotes 5000]
 ```
 
 ## Como executar os testes
